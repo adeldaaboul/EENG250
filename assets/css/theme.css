@@ -1,0 +1,54 @@
+/* Site theme (design B, modern cards). Warm grey canvas, white rounded cards, a cardinal banner, chapters as tiles. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --bg: #f7f6f1;
+  --surface: #ffffff;
+  --panel: #f2f0e8;
+  --border: #e3e0d6;
+  --radius: 12px;
+  --font-body: "Inter", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 20px rgba(0,0,0,.06);
+  --maxw: 1100px;
+}
+
+body { font-size: 16px; }
+h1, h2, h3 { letter-spacing: -.015em; }
+h2 { font-weight: 800; }
+.site-header { background: var(--surface); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 10; }
+.brand-code { color: var(--cardinal); font-weight: 800; }
+.site-nav a { font-weight: 500; }
+
+.hero { padding: 36px 32px; border-radius: 18px; color: #fff; background: var(--cardinal); box-shadow: var(--shadow); }
+.hero .eyebrow, .hero .lead, .hero .facts { color: rgba(255,255,255,.88); }
+.hero h1 { font-weight: 800; }
+@media (max-width: 600px) { .hero { padding: 26px 20px; } }
+
+/* Schedule inside a card */
+.schedule { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.schedule th { background: #fbfaf7; }
+
+/* Chapter tiles */
+.chapter-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.ch-link {
+  height: 100%; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+  transition: transform .15s, box-shadow .15s;
+}
+a.ch-link:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
+.ch-title { flex: 1; }
+.is-soon .ch-link { background: transparent; box-shadow: none; border-style: dashed; }
+
+.lane, .q, .coverage, .clo-list, .info-block, .chapter-top > section, .prose {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.lane, .info-block, .prose { padding: 20px; }
+.chapter-top > section { padding: 18px 20px; }
+.clo-list { padding: 4px 20px; }
+.clo-list li:last-child { border-bottom: 0; }
+.coverage { padding: 14px 20px; }
+.prose h2 { font-size: 1.2rem; }
+.q { padding: 22px; }
+.q.is-done { border-color: var(--ok); }
+.opt { border-radius: 10px; }
+.scorebar { box-shadow: 0 -6px 20px rgba(0,0,0,.06); border-top: 0; }

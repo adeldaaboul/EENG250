@@ -1,0 +1,12 @@
+# Publish only the website. Anything else dropped in this folder (teaching packs,
+# calendars, syllabus, the private instructor area) stays on this computer.
+/*
+!/.gitignore
+!/README.md
+!/index.html
+!/chapter.html
+!/sheet.html
+!/assets/
+!/chapters/
+!/course/
+!/tools/
