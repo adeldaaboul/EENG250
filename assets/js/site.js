@@ -1,14 +1,16 @@
-// Shared page code: header, footer, home page and chapter page.
+// Shared page code: header, footer, home page, chapter pages and the Topics page.
+// The same functions build each page's HTML in the browser and in tools/build.js, which
+// writes it into the published pages so search engines can read them without running scripts.
 window.EENG = window.EENG || {};
 
 (function (E) {
   E.chapters = E.chapters || {};
   E.sheets = E.sheets || {};
 
-  var params = new URLSearchParams(location.search);
+  // Path from the current page back to the site root, e.g. "../" on a chapter page.
+  E.root = window.EENG_ROOT || "";
 
   E.pad = function (n) { return String(n).padStart(2, "0"); };
-  E.param = function (name) { return params.get(name); };
 
   E.loadScript = function (src) {
     return new Promise(function (resolve, reject) {
@@ -41,6 +43,15 @@ window.EENG = window.EENG || {};
     return E.course.chapters.filter(function (c) { return c.n === n; })[0];
   };
 
+  // Page addresses, relative to the current page.
+  E.url = {
+    home: function (hash) { return (E.root || "./") + (hash ? "#" + hash : ""); },
+    chapter: function (n) { return E.root + E.chapterInfo(n).slug + "/"; },
+    sheet: function (n, part) { return E.url.chapter(n) + (part ? "part-" + part + "/" : "") + "practice/"; },
+    topics: function () { return E.root + "topics/"; },
+    file: function (href) { return E.root + href; }
+  };
+
   // Weeks in which a chapter is taught, from the schedule.
   E.chapterWeeks = function (n) {
     return E.course.weeks.filter(function (w) {
@@ -60,29 +71,26 @@ window.EENG = window.EENG || {};
     return s && s.length ? s.join(sep || ", ") : "";
   }
 
-  function renderChrome() {
+  E.headerHTML = function () {
     var c = E.course;
-    var header = document.getElementById("site-header");
-    if (header) {
-      header.innerHTML =
-        '<div class="wrap">' +
-        '<a class="brand" href="index.html">' +
-        '<span class="brand-code">' + c.code + '</span>' +
-        '<span class="brand-title">' + c.title + '</span></a>' +
-        '<nav class="site-nav" aria-label="Main">' +
-        '<a href="index.html#schedule">Schedule</a>' +
-        '<a href="index.html#chapters">Chapters</a>' +
-        '<a href="index.html#how">How it works</a>' +
-        '<a href="index.html#course">Course info</a>' +
-        '</nav></div>';
-    }
-    var footer = document.getElementById("site-footer");
-    if (footer) {
-      footer.innerHTML =
-        '<div class="wrap"><p>' + c.code + " &middot; " + c.title + "</p>" +
-        "<p>Textbook: " + c.textbook + "</p></div>";
-    }
-  }
+    return '<div class="wrap">' +
+      '<a class="brand" href="' + E.url.home() + '">' +
+      '<span class="brand-code">' + c.code + '</span>' +
+      '<span class="brand-title">' + c.title + '</span></a>' +
+      '<nav class="site-nav" aria-label="Main">' +
+      '<a href="' + E.url.home("schedule") + '">Schedule</a>' +
+      '<a href="' + E.url.home("chapters") + '">Chapters</a>' +
+      '<a href="' + E.url.topics() + '">Topics</a>' +
+      '<a href="' + E.url.home("how") + '">How it works</a>' +
+      '<a href="' + E.url.home("course") + '">Course info</a>' +
+      '</nav></div>';
+  };
+
+  E.footerHTML = function () {
+    var c = E.course;
+    return '<div class="wrap"><p>' + c.code + " &middot; " + c.title + " &middot; prepared by " + c.preparedBy + "</p>" +
+      "<p>Textbook: " + c.textbook + "</p></div>";
+  };
 
   function statusBadge(ch) {
     var open = ch.status === "open";
@@ -97,7 +105,7 @@ window.EENG = window.EENG || {};
       '<span class="ch-meta"><span class="ch-weeks">' + weekRange(E.chapterWeeks(ch.n)) + "</span>" +
       '<span class="tag">' + ch.clo + "</span>" + statusBadge(ch) + "</span>";
     return '<li class="chapter-item' + (open ? "" : " is-soon") + '">' +
-      (open ? '<a class="ch-link" href="chapter.html?ch=' + ch.n + '">' + inner + "</a>"
+      (open ? '<a class="ch-link" href="' + E.url.chapter(ch.n) + '">' + inner + "</a>"
             : '<div class="ch-link">' + inner + "</div>") +
       "</li>";
   }
@@ -109,9 +117,9 @@ window.EENG = window.EENG || {};
       return !part || f.part === part;
     }).map(function (f) {
       var name = f.short || f.kind;
-      return f.href ? '<a href="' + f.href + '" target="_blank" rel="noopener">' + name + " (PDF)</a>" : '<span class="muted">' + name + " (soon)</span>";
+      return f.href ? '<a href="' + E.url.file(f.href) + '" target="_blank" rel="noopener">' + name + " (PDF)</a>" : '<span class="muted">' + name + " (soon)</span>";
     });
-    if (ch.sheet) links.push('<a href="sheet.html?ch=' + ch.n + (part ? "&amp;part=" + part : "") + '">' + (part ? "Part " + part + " practice sheet" : "Practice sheet") + " (online)</a>");
+    if (ch.sheet) links.push('<a href="' + E.url.sheet(ch.n, part) + '">' + (part ? "Part " + part + " practice sheet" : "Practice sheet") + " (online)</a>");
     return links.join("<br>");
   }
 
@@ -129,7 +137,7 @@ window.EENG = window.EENG || {};
           seen[key] = true;
           rows += ch
             ? '<tr class="band"><td colspan="4">' +
-              (ch.status === "open" ? '<a href="chapter.html?ch=' + ch.n + '">' : "<span>") +
+              (ch.status === "open" ? '<a href="' + E.url.chapter(ch.n) + '">' : "<span>") +
               "Chapter " + ch.n + ": " + ch.title + (ch.status === "open" ? "</a>" : "</span>") +
               ' <span class="band-meta">' + weekRange(E.chapterWeeks(ch.n)) + " &middot; " + ch.clo + "</span></td></tr>"
             : '<tr class="band band-revision"><td colspan="4"><span>Revision</span></td></tr>';
@@ -138,7 +146,7 @@ window.EENG = window.EENG || {};
           return '<span class="ev ev-' + ev.type + '">' + ev.text + "</span>";
         }).join("") : "";
         var date = weekDates(w, it, "<br>");
-        rows +='<tr class="' + (ch ? "row" : "row row-revision") + '">' +
+        rows += '<tr class="' + (ch ? "row" : "row row-revision") + '">' +
           '<td class="wk" data-label="Week"><strong>' + w.w + "</strong>" + (date ? '<span class="date">' + date + "</span>" : "") + "</td>" +
           '<td data-label="Topics">' + (ch ? '<span class="row-ch">Ch. ' + ch.n + (it.part ? " &middot; Part " + it.part : "") + "</span> " : "") + it.topics + "</td>" +
           '<td data-label="Materials">' + (ch && firstOfPart ? materialLinks(ch, it.part) : "") + "</td>" +
@@ -164,11 +172,9 @@ window.EENG = window.EENG || {};
       }).join("") + "</div>";
   }
 
-  E.renderHome = function () {
+  E.homeHTML = function () {
     var c = E.course;
-    var main = document.getElementById("main");
-    main.innerHTML =
-      '<div class="wrap">' +
+    return '<div class="wrap">' +
       '<section class="hero">' +
       '<p class="eyebrow">Course website <span class="byline">prepared by ' + c.preparedBy + "</span></p>" +
       "<h1>" + c.code + ' <span class="hero-sep">&middot;</span> ' + c.title + "</h1>" +
@@ -182,7 +188,8 @@ window.EENG = window.EENG || {};
       scheduleTable() + "</section>" +
 
       '<section class="section" id="chapters"><h2>Chapters</h2>' +
-      '<ul class="chapter-list">' + c.chapters.map(chapterItem).join("") + "</ul></section>" +
+      '<ul class="chapter-list">' + c.chapters.map(chapterItem).join("") + "</ul>" +
+      '<p class="section-note">Looking for one subject, such as Thévenin equivalents or op amps? <a href="' + E.url.topics() + '">Browse by topic</a>.</p></section>' +
 
       '<section class="section" id="how"><h2>How this course works</h2>' +
       '<div class="lanes">' +
@@ -207,96 +214,125 @@ window.EENG = window.EENG || {};
       }).join("") + "</ol>" +
       '<p class="section-note">All four map to ' + c.plos + ".</p>" +
       "</section></div>";
-    E.math(main);
   };
 
-  E.renderChapter = function () {
-    var n = parseInt(E.param("ch"), 10);
+  // The chapter page. Needs the chapter's data file (chapters/NN/chapter.js) loaded.
+  E.chapterHTML = function (n) {
     var ch = E.chapterInfo(n);
-    var main = document.getElementById("main");
-    if (!ch) {
-      main.innerHTML = '<div class="wrap"><h1>Chapter not found</h1><p><a href="index.html">Back to the schedule</a></p></div>';
-      return;
-    }
-    document.title = "Chapter " + n + ": " + ch.title + " · " + E.course.code;
+    var d = E.chapters[n] || {};
     var weeks = E.chapterWeeks(n);
     if (ch.status !== "open") {
-      main.innerHTML = '<div class="wrap"><p class="eyebrow">Chapter ' + n + " &middot; " + weekRange(weeks) + "</p><h1>" + ch.title + "</h1>" +
-        '<p class="lead">This chapter opens soon.</p><p><a href="index.html#schedule">Back to the schedule</a></p></div>';
-      return;
+      return '<div class="wrap"><p class="eyebrow">Chapter ' + n + " &middot; " + weekRange(weeks) + "</p><h1>" + ch.title + "</h1>" +
+        '<p class="lead">This chapter opens soon.</p><p><a href="' + E.url.home("schedule") + '">Back to the schedule</a></p></div>';
     }
-    E.loadScript("chapters/" + E.pad(n) + "/chapter.js").then(function () {
-      var d = E.chapters[n] || {};
-      var whenRows = E.course.weeks.map(function (w) {
-        return w.items.filter(function (it) { return it.ch === n; }).map(function (it) {
-          var date = weekDates(w, it);
-          return '<li><span class="when-wk">Week ' + w.w + (date ? " &middot; " + date : "") + (it.part ? " &middot; Part " + it.part : "") + "</span><span>" + it.topics + "</span></li>";
-        }).join("");
+    var whenRows = E.course.weeks.map(function (w) {
+      return w.items.filter(function (it) { return it.ch === n; }).map(function (it) {
+        var date = weekDates(w, it);
+        return '<li><span class="when-wk">Week ' + w.w + (date ? " &middot; " + date : "") + (it.part ? " &middot; Part " + it.part : "") + "</span><span>" + it.topics + "</span></li>";
       }).join("");
-      var lastPart = 0;
-      var files = (ch.files || []).map(function (f) {
-        var head = f.part && f.part !== lastPart ? '<li class="material-part">' + ((ch.parts || [])[f.part - 1] || "Part " + f.part) + "</li>" : "";
-        lastPart = f.part || 0;
-        return head + '<li class="material"><span class="material-kind">' + f.kind + "</span>" +
-          '<span class="material-label">' + f.label + "</span>" +
-          (f.href ? '<a class="btn" href="' + f.href + '" target="_blank" rel="noopener">Open PDF</a>'
-                  : '<span class="badge badge-soon">Coming soon</span>') + "</li>";
-      }).join("");
-      var checkKey = "eeng250-check-" + n;
-      var checked = E.store.get(checkKey) || [];
-      var boxNo = 0; // checkbox index across all parts, for saving ticks
+    }).join("");
+    var lastPart = 0;
+    var files = (ch.files || []).map(function (f) {
+      var head = f.part && f.part !== lastPart ? '<li class="material-part">' + ((ch.parts || [])[f.part - 1] || "Part " + f.part) + "</li>" : "";
+      lastPart = f.part || 0;
+      return head + '<li class="material"><span class="material-kind">' + f.kind + "</span>" +
+        '<span class="material-label">' + f.label + "</span>" +
+        (f.href ? '<a class="btn" href="' + E.url.file(f.href) + '" target="_blank" rel="noopener">Open PDF</a>'
+                : '<span class="badge badge-soon">Coming soon</span>') + "</li>";
+    }).join("");
+    var boxNo = 0; // checkbox index across all parts, for saving ticks
 
-      function sheetCard(p, title) {
-        return '<a class="sheet-card" href="sheet.html?ch=' + n + (p ? "&amp;part=" + p : "") + '">' +
-          '<span class="eyebrow">Open practice &middot; AI allowed</span>' +
-          "<strong>Solve the " + (p ? "Part " + p + " " : "") + "practice sheet online</strong>" +
-          "<span>" + (p ? title + ". " : "") + "Each question tells you at once whether your answer, and your reason, are right.</span>" +
-          '<span class="btn">Start the sheet</span></a>';
-      }
+    function sheetCard(p, title) {
+      return '<a class="sheet-card" href="' + E.url.sheet(n, p) + '">' +
+        '<span class="eyebrow">Open practice &middot; AI allowed</span>' +
+        "<strong>Solve the " + (p ? "Part " + p + " " : "") + "practice sheet online</strong>" +
+        "<span>" + (p ? title + ". " : "") + "Each question tells you at once whether your answer, and your reason, are right.</span>" +
+        '<span class="btn">Start the sheet</span></a>';
+    }
 
-      // One block of intro sections and checklist; a chapter in parts has one block per part.
-      function block(b, partTitle) {
-        var h = partTitle ? "h3" : "h2";
-        return (partTitle ? '<section class="section part-head"><h2>' + partTitle + "</h2>" +
-            (b.lead ? '<p class="lead">' + b.lead + "</p>" : "") + "</section>" : "") +
-          (b.sections || []).map(function (s) {
-            return '<section class="section prose"><' + h + ">" + s.title + "</" + h + ">" + s.html + "</section>";
-          }).join("") +
-          (b.checklist ? '<section class="section"><' + h + ">Checklist: you can do these without help</" + h + ">" +
-            '<p class="section-note">Tick each one when you can. Your ticks are saved in this browser only.</p><ul class="checklist">' +
-            b.checklist.map(function (c) {
-              var i = boxNo++;
-              return '<li><label><input type="checkbox" data-i="' + i + '"' + (checked.indexOf(i) >= 0 ? " checked" : "") + "><span>" + c + "</span></label></li>";
-            }).join("") + "</ul></section>" : "");
-      }
+    // One block of intro sections and checklist; a chapter in parts has one block per part.
+    function block(b, partTitle) {
+      var h = partTitle ? "h3" : "h2";
+      return (partTitle ? '<section class="section part-head"><h2>' + partTitle + "</h2>" +
+          (b.lead ? '<p class="lead">' + b.lead + "</p>" : "") + "</section>" : "") +
+        (b.sections || []).map(function (s) {
+          return '<section class="section prose"><' + h + ">" + s.title + "</" + h + ">" + s.html + "</section>";
+        }).join("") +
+        (b.checklist ? '<section class="section"><' + h + ">Checklist: you can do these without help</" + h + ">" +
+          '<p class="section-note">Tick each one when you can. Your ticks are saved in this browser only.</p><ul class="checklist">' +
+          b.checklist.map(function (c) {
+            return '<li><label><input type="checkbox" data-i="' + (boxNo++) + '"><span>' + c + "</span></label></li>";
+          }).join("") + "</ul></section>" : "");
+    }
 
-      main.innerHTML =
-        '<div class="wrap">' +
-        '<p class="crumbs"><a href="index.html#schedule">Schedule</a></p>' +
-        '<header class="chapter-head"><p class="eyebrow">Chapter ' + n + " &middot; " + ch.clo + " &middot; " + weekRange(weeks) + "</p>" +
-        "<h1>" + ch.title + "</h1>" + (d.lead ? '<p class="lead">' + d.lead + "</p>" : "") + "</header>" +
+    return '<div class="wrap">' +
+      '<p class="crumbs"><a href="' + E.url.home("schedule") + '">Schedule</a></p>' +
+      '<header class="chapter-head"><p class="eyebrow">Chapter ' + n + " &middot; " + ch.clo + " &middot; " + weekRange(weeks) + "</p>" +
+      "<h1>" + ch.title + "</h1>" + (d.lead ? '<p class="lead">' + d.lead + "</p>" : "") + "</header>" +
 
-        '<div class="chapter-top">' +
-        '<section class="when"><h2>When</h2><ul class="when-list">' + whenRows + "</ul>" +
-        (ch.quiz ? '<p class="when-quiz"><span class="ev ev-quiz">Quiz</span> ' + ch.quiz + "</p>" : "") + "</section>" +
-        '<section class="materials-box"><h2>Materials</h2><ul class="materials">' + files + "</ul>" +
-        (ch.sheet ? (ch.parts ? ch.parts.map(function (t, i) { return sheetCard(i + 1, t); }).join("") : sheetCard(0)) : "") +
-        "</section></div>" +
+      '<div class="chapter-top">' +
+      '<section class="when"><h2>When</h2><ul class="when-list">' + whenRows + "</ul>" +
+      (ch.quiz ? '<p class="when-quiz"><span class="ev ev-quiz">Quiz</span> ' + ch.quiz + "</p>" : "") + "</section>" +
+      '<section class="materials-box"><h2>Materials</h2><ul class="materials">' + files + "</ul>" +
+      (ch.sheet ? (ch.parts ? ch.parts.map(function (t, i) { return sheetCard(i + 1, t); }).join("") : sheetCard(0)) : "") +
+      "</section></div>" +
 
-        (d.parts ? d.parts.map(function (p) { return block(p, p.title); }).join("") : block(d)) +
-        "</div>";
-
-      main.querySelectorAll(".checklist input").forEach(function (box) {
-        box.addEventListener("change", function () {
-          var list = [].map.call(main.querySelectorAll(".checklist input:checked"), function (b) { return +b.getAttribute("data-i"); });
-          E.store.set(checkKey, list);
-        });
-      });
-      E.math(main);
-    }).catch(function (err) {
-      main.innerHTML = '<div class="wrap"><h1>' + ch.title + "</h1><p>" + err.message + "</p></div>";
-    });
+      (d.parts ? d.parts.map(function (p) { return block(p, p.title); }).join("") : block(d)) +
+      "</div>";
   };
 
-  document.addEventListener("DOMContentLoaded", renderChrome);
+  // The Topics page: every subject students search for, with its chapter and practice sheet.
+  E.topicsHTML = function () {
+    var c = E.course;
+    return '<div class="wrap">' +
+      '<p class="crumbs"><a href="' + E.url.home("chapters") + '">Chapters</a></p>' +
+      '<header class="chapter-head"><p class="eyebrow">Browse by topic</p><h1>Electric circuits topics</h1>' +
+      '<p class="lead">Every topic in ' + c.code + " " + c.title + ", with its lecture slides and a free practice sheet that checks your answers as you go.</p></header>" +
+      c.chapters.map(function (ch) {
+        var list = c.topics.filter(function (t) { return t.ch === ch.n; });
+        if (!list.length) return "";
+        return '<section class="section topic-group"><h2><a href="' + E.url.chapter(ch.n) + '">Chapter ' + ch.n + ": " + ch.title + "</a></h2>" +
+          '<ul class="topic-list">' + list.map(function (t) {
+            return '<li><a class="topic-name" href="' + E.url.chapter(ch.n) + '">' + t.name + "</a>" +
+              (ch.sheet ? '<a class="topic-practice" href="' + E.url.sheet(ch.n, t.part) + '">Practice problems' + (t.part ? ", Part " + t.part : "") + "</a>" : "") + "</li>";
+          }).join("") + "</ul></section>";
+      }).join("") + "</div>";
+  };
+
+  // In the browser: fill a page part only if the build did not already write it.
+  function fill(id, html) {
+    var el = document.getElementById(id);
+    if (el && !el.firstElementChild) el.innerHTML = html;
+    return el;
+  }
+
+  function chrome() {
+    fill("site-header", E.headerHTML());
+    fill("site-footer", E.footerHTML());
+  }
+
+  E.renderHome = function () {
+    chrome();
+    E.math(fill("main", E.homeHTML()));
+  };
+
+  E.renderTopics = function () {
+    chrome();
+    E.math(fill("main", E.topicsHTML()));
+  };
+
+  E.renderChapter = function (n) {
+    chrome();
+    var main = fill("main", E.chapterHTML(n));
+    var checkKey = "eeng250-check-" + n;
+    var checked = E.store.get(checkKey) || [];
+    main.querySelectorAll(".checklist input").forEach(function (box) {
+      box.checked = checked.indexOf(+box.getAttribute("data-i")) >= 0;
+      box.addEventListener("change", function () {
+        var list = [].map.call(main.querySelectorAll(".checklist input:checked"), function (b) { return +b.getAttribute("data-i"); });
+        E.store.set(checkKey, list);
+      });
+    });
+    E.math(main);
+  };
 })(window.EENG);

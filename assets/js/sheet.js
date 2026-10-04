@@ -157,76 +157,76 @@
     }).join("") + "</ol>";
   }
 
-  E.renderSheet = function () {
-    n = parseInt(E.param("ch"), 10);
-    part = parseInt(E.param("part"), 10) || 0;
+  // Page title for a sheet, e.g. "Chapter 4, Part 1, Node Voltages and Mesh Currents".
+  E.sheetLabel = function (n, p) {
+    var info = E.chapterInfo(n);
+    return "Chapter " + n + (p ? ", Part " + p : "") + ", " + (p ? info.parts[p - 1].replace(/^Part [0-9]+: /, "") : info.title);
+  };
+
+  // The whole sheet page. Needs chapters/NN/chapter.js and the sheet file loaded.
+  // Answers and Sure/Unsure marks saved in this browser are restored into it.
+  E.sheetHTML = function (chNum, p) {
+    n = chNum;
+    part = p || 0;
     key = part ? n + "-" + part : String(n);
     var info = E.chapterInfo(n);
-    var main = document.getElementById("main");
-    if (!info || info.status !== "open" || !info.sheet || (info.parts ? !part : part)) {
-      main.innerHTML = '<div class="wrap"><h1>No practice sheet yet</h1><p><a href="index.html">Back to the schedule</a></p></div>';
-      return;
-    }
-    var label = "Chapter " + n + (part ? ", Part " + part : "");
-    document.title = "Practice sheet, " + label + " · " + E.course.code;
-    var dir = "chapters/" + E.pad(n) + "/";
+    chapter = E.chapters[n] || {};
+    sheet = E.sheets[key];
+    state = (typeof localStorage !== "undefined" && E.store.get(storeKey())) || {};
     var pdf = (info.files || []).filter(function (f) { return f.kind === "Sheet" && f.href && (!part || f.part === part); })[0];
-    var file = dir + (part ? "sheet-part" + part + ".js" : "sheet.js");
-    E.loadScript(dir + "chapter.js").then(function () { return E.loadScript(file); }).then(function () {
-      chapter = E.chapters[n] || {};
-      sheet = E.sheets[key];
-      if (!sheet) throw new Error("No practice sheet for " + label + " yet.");
-      state = E.store.get(storeKey()) || {};
-      main.innerHTML =
-        '<div class="wrap">' +
-        '<p class="crumbs"><a href="chapter.html?ch=' + n + '">Chapter ' + n + ": " + info.title + "</a></p>" +
-        '<header class="chapter-head"><p class="eyebrow">Open practice &middot; AI allowed</p>' +
-        "<h1>Practice sheet: " + label + ", " + (part ? info.parts[part - 1].replace(/^Part [0-9]+: /, "") : info.title) + "</h1>" +
-        '<p class="lead">' + sheet.intro + "</p></header>" +
-        '<ul class="rules">' + sheet.rules.map(function (r) { return "<li>" + r + "</li>"; }).join("") + "</ul>" +
-        (pdf ? '<p class="section-note">Prefer paper? <a href="' + pdf.href + '" target="_blank" rel="noopener">Open the printable PDF</a>.</p>' : "") +
-        '<details class="coverage"><summary>Which questions practise which skill</summary>' + coverage() + "</details>" +
-        '<div class="questions">' + sheet.questions.map(renderQuestion).join("") + "</div>" +
-        "</div>" +
-        '<div class="scorebar"><div class="wrap scorebar-inner">' +
-        '<span id="score-text"></span><span class="score-track"><span id="score-bar"></span></span>' +
-        '<button type="button" class="btn btn-quiet" id="reset">Start over</button></div></div>';
+    return '<div class="wrap">' +
+      '<p class="crumbs"><a href="' + E.url.chapter(n) + '">Chapter ' + n + ": " + info.title + "</a></p>" +
+      '<header class="chapter-head"><p class="eyebrow">Open practice &middot; AI allowed</p>' +
+      "<h1>Practice sheet: " + E.sheetLabel(n, part) + "</h1>" +
+      '<p class="lead">' + sheet.intro + "</p></header>" +
+      '<ul class="rules">' + sheet.rules.map(function (r) { return "<li>" + r + "</li>"; }).join("") + "</ul>" +
+      (pdf ? '<p class="section-note">Prefer paper? <a href="' + E.url.file(pdf.href) + '" target="_blank" rel="noopener">Open the printable PDF</a>.</p>' : "") +
+      '<details class="coverage"><summary>Which questions practise which skill</summary>' + coverage() + "</details>" +
+      '<div class="questions">' + sheet.questions.map(renderQuestion).join("") + "</div>" +
+      "</div>" +
+      '<div class="scorebar"><div class="wrap scorebar-inner">' +
+      '<span id="score-text"></span><span class="score-track"><span id="score-bar"></span></span>' +
+      '<button type="button" class="btn btn-quiet" id="reset">Start over</button></div></div>';
+  };
 
-      sheet.questions.forEach(function (q) {
-        var el = document.getElementById(q.id);
-        if (state[q.id] && state[q.id].checked) check(el, q, true);
-        el.addEventListener("click", function (e) {
-          var btn = e.target.closest("button");
-          if (!btn) return;
-          var act = btn.getAttribute("data-act");
-          var conf = btn.getAttribute("data-conf");
-          if (act === "check") check(el, q);
-          if (act === "explain") {
-            var ex = el.querySelector(".explain");
-            ex.hidden = !ex.hidden;
-            btn.textContent = ex.hidden ? "Show explanation" : "Hide explanation";
-          }
-          if (conf) {
-            var s = state[q.id] = state[q.id] || {};
-            s.conf = s.conf === conf ? "" : conf;
-            el.querySelectorAll("[data-conf]").forEach(function (b) {
-              b.setAttribute("aria-pressed", String(b.getAttribute("data-conf") === s.conf));
-            });
-            save();
-            updateScore();
-          }
-        });
+  E.renderSheet = function (chNum, p) {
+    var main = document.getElementById("main");
+    if (!document.getElementById("site-header").firstElementChild) document.getElementById("site-header").innerHTML = E.headerHTML();
+    if (!document.getElementById("site-footer").firstElementChild) document.getElementById("site-footer").innerHTML = E.footerHTML();
+    main.innerHTML = E.sheetHTML(chNum, p);
+
+    sheet.questions.forEach(function (q) {
+      var el = document.getElementById(q.id);
+      if (state[q.id] && state[q.id].checked) check(el, q, true);
+      el.addEventListener("click", function (e) {
+        var btn = e.target.closest("button");
+        if (!btn) return;
+        var act = btn.getAttribute("data-act");
+        var conf = btn.getAttribute("data-conf");
+        if (act === "check") check(el, q);
+        if (act === "explain") {
+          var ex = el.querySelector(".explain");
+          ex.hidden = !ex.hidden;
+          btn.textContent = ex.hidden ? "Show explanation" : "Hide explanation";
+        }
+        if (conf) {
+          var s = state[q.id] = state[q.id] || {};
+          s.conf = s.conf === conf ? "" : conf;
+          el.querySelectorAll("[data-conf]").forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b.getAttribute("data-conf") === s.conf));
+          });
+          save();
+          updateScore();
+        }
       });
-      document.getElementById("reset").addEventListener("click", function () {
-        if (!confirm("Clear all your answers and Sure/Unsure marks on this sheet?")) return;
-        state = {};
-        save();
-        E.renderSheet();
-      });
-      updateScore();
-      E.math(main);
-    }).catch(function (err) {
-      main.innerHTML = '<div class="wrap"><h1>Practice sheet</h1><p>' + err.message + "</p></div>";
     });
+    document.getElementById("reset").addEventListener("click", function () {
+      if (!confirm("Clear all your answers and Sure/Unsure marks on this sheet?")) return;
+      state = {};
+      save();
+      E.renderSheet(chNum, p);
+    });
+    updateScore();
+    E.math(main);
   };
 })(window.EENG);

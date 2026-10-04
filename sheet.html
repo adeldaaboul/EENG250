@@ -2,23 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/theme.css">
-<title>Practice sheet · EENG250</title>
+<meta name="robots" content="noindex">
+<title>EENG250 Electric Circuits I</title>
+<script>
+  var slugs = {"1":"chapter-1-circuit-variables","2":"chapter-2-circuit-elements","3":"chapter-3-simple-resistive-circuits","4":"chapter-4-techniques-of-circuit-analysis","5":"chapter-5-operational-amplifier","6":"chapter-6-inductors-and-capacitors","7":"chapter-7-rl-rc-natural-and-step-responses"};
+  var q = new URLSearchParams(location.search), slug = slugs[q.get("ch")], part = q.get("part");
+  location.replace(slug ? slug + "/" + (true ? (part ? "part-" + part + "/" : "") + "practice/" : "") : "./");
+</script>
 </head>
-<body class="page-sheet">
-<header class="site-header" id="site-header"></header>
-<main class="site-main" id="main"></main>
-<footer class="site-footer" id="site-footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
-<script src="course/course.js"></script>
-<script src="assets/js/figures.js"></script>
-<script src="assets/js/site.js"></script>
-<script src="assets/js/sheet.js"></script>
-<script>EENG.renderSheet();</script>
-</body>
+<body><p><a href="./">EENG250 Electric Circuits I</a></p></body>
 </html>

@@ -10,3 +10,8 @@
 !/chapters/
 !/course/
 !/tools/
+# Pages written by tools/build.js
+!/chapter-*/
+!/topics/
+!/404.html
+!/sitemap.xml

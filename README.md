@@ -19,16 +19,21 @@ Drop the chapter's files folder (e.g. `EENG250 Ch2 Website Files`) into this fol
 2. Copy the instructor PDFs (overview and key, quiz versions) to `private/chapters/02/` and list them in `private/index.html`.
 3. In `course/course.js`, set the chapter's `status` to `"open"` and fill in each file's `href`. Quiz dates and exams go in `weeks[].events`.
 4. For the online practice sheet, add `chapters/02/chapter.js` (page text and checklist) and `chapters/02/sheet.js` (questions), following Chapter 1, and set `sheet: true`.
+5. Rebuild the pages and sitemap: `node tools/build.js`. Every page is written as plain HTML so search engines can read it; never edit the generated pages by hand.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `index.html`, `chapter.html`, `sheet.html` | The three public page types |
+| `index.html`, `topics/`, `chapter-N-…/` (with `practice/` inside) | Pages written by `tools/build.js`: home, Topics, one page per chapter and one per practice sheet |
+| `chapter.html`, `sheet.html` | Forward old links (`?ch=…`) to the new addresses |
+| `sitemap.xml`, `404.html` | Search-engine sitemap and the not-found page, also written by the build |
 | `course/course.js` | Course details, chapters and the schedule |
 | `chapters/NN/` | Each chapter's introduction, practice sheet and PDFs |
 | `assets/` | Styles (`base.css` for layout, `theme.css` for the look) and page scripts |
+| `tools/build.js` | Writes all pages, the sitemap and the redirects from the course data |
 | `tools/serve.js` | Local preview server |
+| `tools/social-card.html` | Source of `assets/social-card.png`, the image shown when a link is shared |
 | `private/` | Instructor only: quizzes, keys, oral checks, syllabus. Git-ignored, so never pushed. |
 
 Practice-sheet answers are checked in the student's browser; nothing is collected or sent anywhere.
