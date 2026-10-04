@@ -45,6 +45,7 @@ h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
 h2 { font-size: 1.45rem; color: var(--accent); }
 h3 { font-size: 1.08rem; }
 p { margin: 0 0 1em; }
+[hidden] { display: none !important; } /* keep hidden elements hidden even when a class sets display */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .muted { color: var(--muted); }
 
@@ -166,9 +167,14 @@ a.ch-link .ch-title { color: var(--link); }
 .when-quiz { margin: 10px 0 0; font-size: .95rem; }
 .materials { list-style: none; padding: 0; margin: 0 0 14px; }
 .material { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.material-part { list-style: none; padding: 12px 0 2px; font-family: var(--font-ui); font-size: .82rem; font-weight: 700; color: var(--accent); }
+.material-part:first-child { padding-top: 0; }
+.part-head h2 { background: var(--band); color: var(--band-fg); padding: 8px 14px; border-radius: var(--radius); font-size: 1.25rem; }
+.part-head .lead { margin-top: 8px; }
 .material-kind { font-family: var(--font-ui); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); min-width: 4.2em; }
 .material-label { flex: 1; font-weight: 600; min-width: 10em; }
 .material .btn { padding: 4px 12px; font-size: .85rem; }
+.sheet-card + .sheet-card { margin-top: 12px; }
 .sheet-card { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: inherit; text-decoration: none; }
 .sheet-card strong { font-family: var(--font-head); font-size: 1.12rem; color: var(--link); }
 .sheet-card .btn { margin-top: 8px; }
@@ -209,6 +215,7 @@ a.ch-link .ch-title { color: var(--link); }
 .hint { font-size: .95rem; color: var(--muted); }
 
 .tier { margin-top: 14px; }
+.tier-note { margin: 0; color: var(--muted); font-size: .95rem; font-style: italic; }
 .tier-label { font-family: var(--font-ui); font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
 .opts { display: flex; flex-direction: column; gap: 6px; }
 .opt {

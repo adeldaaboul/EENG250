@@ -102,23 +102,28 @@ window.EENG = window.EENG || {};
       "</li>";
   }
 
-  // Links for a chapter's materials, used in the schedule.
-  function materialLinks(ch) {
-    if (ch.status !== "open") return '<span class="muted">Released that week</span>';
-    var links = (ch.files || []).map(function (f) {
+  // Links for a chapter's materials, used in the schedule. For a chapter in parts, only that part's files.
+  function materialLinks(ch, part) {
+    if (ch.status !== "open") return '<span class="muted">Coming soon</span>';
+    var links = (ch.files || []).filter(function (f) {
+      return !part || f.part === part;
+    }).map(function (f) {
       var name = f.short || f.kind;
       return f.href ? '<a href="' + f.href + '" target="_blank" rel="noopener">' + name + " (PDF)</a>" : '<span class="muted">' + name + " (soon)</span>";
     });
-    if (ch.sheet) links.push('<a href="sheet.html?ch=' + ch.n + '">Practice sheet (online)</a>');
+    if (ch.sheet) links.push('<a href="sheet.html?ch=' + ch.n + (part ? "&amp;part=" + part : "") + '">' + (part ? "Part " + part + " practice sheet" : "Practice sheet") + " (online)</a>");
     return links.join("<br>");
   }
 
   function scheduleTable() {
-    var c = E.course, seen = {}, rows = "";
+    var c = E.course, seen = {}, seenPart = {}, rows = "";
     c.weeks.forEach(function (w) {
       w.items.forEach(function (it, k) {
         var ch = it.ch ? E.chapterInfo(it.ch) : null;
         var key = it.ch || "rev";
+        var partKey = key + "-" + (it.part || 0);
+        var firstOfPart = !seenPart[partKey];
+        seenPart[partKey] = true;
         var first = !seen[key];
         if (first) {
           seen[key] = true;
@@ -135,8 +140,8 @@ window.EENG = window.EENG || {};
         var date = weekDates(w, it, "<br>");
         rows +='<tr class="' + (ch ? "row" : "row row-revision") + '">' +
           '<td class="wk" data-label="Week"><strong>' + w.w + "</strong>" + (date ? '<span class="date">' + date + "</span>" : "") + "</td>" +
-          '<td data-label="Topics">' + (ch ? '<span class="row-ch">Ch. ' + ch.n + "</span> " : "") + it.topics + "</td>" +
-          '<td data-label="Materials">' + (ch && first ? materialLinks(ch) : "") + "</td>" +
+          '<td data-label="Topics">' + (ch ? '<span class="row-ch">Ch. ' + ch.n + (it.part ? " &middot; Part " + it.part : "") + "</span> " : "") + it.topics + "</td>" +
+          '<td data-label="Materials">' + (ch && firstOfPart ? materialLinks(ch, it.part) : "") + "</td>" +
           '<td data-label="Events">' + events + "</td></tr>";
       });
     });
@@ -167,7 +172,7 @@ window.EENG = window.EENG || {};
       '<section class="hero">' +
       '<p class="eyebrow">Course website <span class="byline">prepared by ' + c.preparedBy + "</span></p>" +
       "<h1>" + c.code + ' <span class="hero-sep">&middot;</span> ' + c.title + "</h1>" +
-      '<p class="lead">Lecture slides, introductions and practice sheets for every chapter, released week by week.</p>' +
+      '<p class="lead">Lecture slides, introductions and practice sheets for every chapter.</p>' +
       '<ul class="facts"><li>' + c.credits + " credits</li><li>" + c.hours + " contact hours</li><li>" + c.weeks.length + " teaching weeks</li><li>Textbook: " + c.textbook + "</li></ul>" +
       "</section>" +
 
@@ -182,7 +187,7 @@ window.EENG = window.EENG || {};
       '<section class="section" id="how"><h2>How this course works</h2>' +
       '<div class="lanes">' +
       '<div class="lane"><p class="eyebrow">Practice &middot; open</p><h3>Practice sheets: any help allowed, AI included</h3>' +
-      "<p>Each chapter has a practice sheet you can solve online, with instant feedback, or print. It is not marked for correctness. Use your notes, classmates or an AI tool, but check every AI answer: chatbots often get signs and directions wrong.</p></div>" +
+      "<p>Each chapter has a practice sheet you can solve online, with instant feedback, or print. Practice sheets are not marked for correctness. Use your notes, classmates or an AI tool, but check every AI answer: chatbots often get signs and directions wrong.</p></div>" +
       '<div class="lane"><p class="eyebrow">In class &middot; device-free</p><h3>Quizzes and quick oral checks</h3>' +
       "<p>Each chapter has a short quiz in class, without phones or laptops, and any student may be asked to explain a step out loud. " +
       "Every quiz question is a twin of a practice-sheet question: the same idea with new numbers or orientation. If you can do the sheet on your own, you will do well on the quiz.</p></div>" +
@@ -225,17 +230,45 @@ window.EENG = window.EENG || {};
       var whenRows = E.course.weeks.map(function (w) {
         return w.items.filter(function (it) { return it.ch === n; }).map(function (it) {
           var date = weekDates(w, it);
-          return '<li><span class="when-wk">Week ' + w.w + (date ? " &middot; " + date : "") + "</span><span>" + it.topics + "</span></li>";
+          return '<li><span class="when-wk">Week ' + w.w + (date ? " &middot; " + date : "") + (it.part ? " &middot; Part " + it.part : "") + "</span><span>" + it.topics + "</span></li>";
         }).join("");
       }).join("");
+      var lastPart = 0;
       var files = (ch.files || []).map(function (f) {
-        return '<li class="material"><span class="material-kind">' + f.kind + "</span>" +
+        var head = f.part && f.part !== lastPart ? '<li class="material-part">' + ((ch.parts || [])[f.part - 1] || "Part " + f.part) + "</li>" : "";
+        lastPart = f.part || 0;
+        return head + '<li class="material"><span class="material-kind">' + f.kind + "</span>" +
           '<span class="material-label">' + f.label + "</span>" +
           (f.href ? '<a class="btn" href="' + f.href + '" target="_blank" rel="noopener">Open PDF</a>'
                   : '<span class="badge badge-soon">Coming soon</span>') + "</li>";
       }).join("");
       var checkKey = "eeng250-check-" + n;
       var checked = E.store.get(checkKey) || [];
+      var boxNo = 0; // checkbox index across all parts, for saving ticks
+
+      function sheetCard(p, title) {
+        return '<a class="sheet-card" href="sheet.html?ch=' + n + (p ? "&amp;part=" + p : "") + '">' +
+          '<span class="eyebrow">Open practice &middot; AI allowed</span>' +
+          "<strong>Solve the " + (p ? "Part " + p + " " : "") + "practice sheet online</strong>" +
+          "<span>" + (p ? title + ". " : "") + "Each question tells you at once whether your answer, and your reason, are right.</span>" +
+          '<span class="btn">Start the sheet</span></a>';
+      }
+
+      // One block of intro sections and checklist; a chapter in parts has one block per part.
+      function block(b, partTitle) {
+        var h = partTitle ? "h3" : "h2";
+        return (partTitle ? '<section class="section part-head"><h2>' + partTitle + "</h2>" +
+            (b.lead ? '<p class="lead">' + b.lead + "</p>" : "") + "</section>" : "") +
+          (b.sections || []).map(function (s) {
+            return '<section class="section prose"><' + h + ">" + s.title + "</" + h + ">" + s.html + "</section>";
+          }).join("") +
+          (b.checklist ? '<section class="section"><' + h + ">Checklist: you can do these without help</" + h + ">" +
+            '<p class="section-note">Tick each one when you can. Your ticks are saved in this browser only.</p><ul class="checklist">' +
+            b.checklist.map(function (c) {
+              var i = boxNo++;
+              return '<li><label><input type="checkbox" data-i="' + i + '"' + (checked.indexOf(i) >= 0 ? " checked" : "") + "><span>" + c + "</span></label></li>";
+            }).join("") + "</ul></section>" : "");
+      }
 
       main.innerHTML =
         '<div class="wrap">' +
@@ -247,22 +280,10 @@ window.EENG = window.EENG || {};
         '<section class="when"><h2>When</h2><ul class="when-list">' + whenRows + "</ul>" +
         (ch.quiz ? '<p class="when-quiz"><span class="ev ev-quiz">Quiz</span> ' + ch.quiz + "</p>" : "") + "</section>" +
         '<section class="materials-box"><h2>Materials</h2><ul class="materials">' + files + "</ul>" +
-        (ch.sheet ? '<a class="sheet-card" href="sheet.html?ch=' + n + '">' +
-          '<span class="eyebrow">Open practice &middot; AI allowed</span>' +
-          "<strong>Solve the practice sheet online</strong>" +
-          "<span>Each question tells you at once whether your answer, and your reason, are right.</span>" +
-          '<span class="btn">Start the sheet</span></a>' : "") +
+        (ch.sheet ? (ch.parts ? ch.parts.map(function (t, i) { return sheetCard(i + 1, t); }).join("") : sheetCard(0)) : "") +
         "</section></div>" +
 
-        (d.sections || []).map(function (s) {
-          return '<section class="section prose"><h2>' + s.title + "</h2>" + s.html + "</section>";
-        }).join("") +
-
-        (d.checklist ? '<section class="section"><h2>Checklist: you can do these without help</h2>' +
-          '<p class="section-note">Tick each one when you can. Your ticks are saved in this browser only.</p><ul class="checklist">' +
-          d.checklist.map(function (c, i) {
-            return '<li><label><input type="checkbox" data-i="' + i + '"' + (checked.indexOf(i) >= 0 ? " checked" : "") + "><span>" + c + "</span></label></li>";
-          }).join("") + "</ul></section>" : "") +
+        (d.parts ? d.parts.map(function (p) { return block(p, p.title); }).join("") : block(d)) +
         "</div>";
 
       main.querySelectorAll(".checklist input").forEach(function (box) {

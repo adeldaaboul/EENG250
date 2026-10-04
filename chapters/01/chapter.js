@@ -58,7 +58,7 @@
         title: "How to study this chapter, and where AI fits",
         html: t`<ul>
 <li>AI tools are allowed on the practice sheet. Use them to check your work, not to replace it.</li>
-<li>AI chatbots often misread polarities and current directions in circuit diagrams. In a 2025 study, this caused about a third of the errors a leading model made on undergraduate circuit problems (<a href="https://arxiv.org/html/2512.10159" target="_blank" rel="noopener">arXiv 2512.10159</a>). That is exactly the skill Chapter 1 teaches, so check the signs in every AI answer.</li>
+<li>AI chatbots often misread polarities and current directions in circuit diagrams. In a 2025 study of Gemini 2.5 Pro, misread source polarities caused about a third of its wrong answers on undergraduate circuit problems, and misread current directions nearly as many (<a href="https://arxiv.org/html/2512.10159" target="_blank" rel="noopener">arXiv 2512.10159</a>). That is exactly the skill Chapter 1 teaches, so check the signs in every AI answer.</li>
 <li>The quiz at the next session is device-free, and every question is a twin of a practice-sheet question. If you can do the sheet on your own, you will do well on the quiz.</li>
 </ul>`
       }

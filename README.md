@@ -11,9 +11,9 @@ Either double-click `index.html`, or run the small preview server (needs Node) a
 node tools/serve.js
 ```
 
-## Releasing a chapter each week
+## Adding or updating a chapter
 
-Drop the chapter's teaching pack (e.g. `EENG250 Ch2 Teaching Pack`) into this folder. Pack folders are git-ignored, so they are never published. Then:
+Drop the chapter's files folder (e.g. `EENG250 Ch2 Website Files`) into this folder. Only website files are published, so these folders never are. Then:
 
 1. Copy the student PDFs (introduction, practice sheet, slides) to `chapters/02/`.
 2. Copy the instructor PDFs (overview and key, quiz versions) to `private/chapters/02/` and list them in `private/index.html`.
@@ -25,7 +25,7 @@ Drop the chapter's teaching pack (e.g. `EENG250 Ch2 Teaching Pack`) into this fo
 | Path | What it is |
 |---|---|
 | `index.html`, `chapter.html`, `sheet.html` | The three public page types |
-| `course/course.js` | Course details, chapters and the week-by-week schedule (edit weekly) |
+| `course/course.js` | Course details, chapters and the schedule |
 | `chapters/NN/` | Each chapter's introduction, practice sheet and PDFs |
 | `assets/` | Styles (`base.css` for layout, `theme.css` for the look) and page scripts |
 | `tools/serve.js` | Local preview server |
