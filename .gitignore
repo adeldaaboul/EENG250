@@ -15,3 +15,6 @@
 !/topics/
 !/404.html
 !/sitemap.xml
+# Search-engine ownership verification files
+!/google*.html
+!/BingSiteAuth.xml
