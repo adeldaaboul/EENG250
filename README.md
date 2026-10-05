@@ -37,3 +37,7 @@ Drop the chapter's files folder (e.g. `EENG250 Ch2 Website Files`) into this fol
 | `private/` | Instructor only: quizzes, keys, oral checks, syllabus. Git-ignored, so never pushed. |
 
 Practice-sheet answers are checked in the student's browser; nothing is collected or sent anywhere.
+
+## Licence
+
+Course materials © 2026 Dr. Adel Daaboul, licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/): share and adapt with credit, not for commercial use. Figures and examples adapted from Nilsson & Riedel remain the publisher’s copyright. See `LICENSE`.

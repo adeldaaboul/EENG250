@@ -14,6 +14,8 @@ EENG.course = {
 
   preparedBy: "Dr. Adel Daaboul",
 
+  license: { name: "CC BY-NC 4.0", url: "https://creativecommons.org/licenses/by-nc/4.0/" },
+
   // Public address of the live site, used for search engines and link previews.
   siteUrl: "https://adeldaaboul.github.io/EENG250/",
   seo: {

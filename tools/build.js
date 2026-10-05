@@ -41,6 +41,7 @@ const plain = (s) => String(s).replace(/<[^>]+>/g, "").replace(/\$/g, "").replac
   .replace(/&rsquo;/g, "’").replace(/&eacute;/g, "é").replace(/&amp;/g, "&").replace(/&[a-z]+;/g, " ").replace(/\s+/g, " ").trim();
 
 const author = { "@type": "Person", name: C.preparedBy };
+const license = C.license.url;
 const course = { "@type": "Course", name: C.code + " " + C.title, courseCode: C.code, url: SITE };
 
 // One complete page. rel = the page's own path from the site root ("" for the home page).
@@ -58,6 +59,7 @@ function page({ rel, depth, title, description, bodyClass, main, scripts, call, 
 <meta name="description" content="${esc(description)}">
 <meta name="author" content="${esc(C.preparedBy)}">
 <link rel="canonical" href="${url}">
+<link rel="license" href="${C.license.url}">
 <meta property="og:type" content="${ogType || "website"}">
 <meta property="og:site_name" content="${esc(C.code + " " + C.title)}">
 <meta property="og:title" content="${esc(title)}">
@@ -98,7 +100,7 @@ write("index.html", page({
   rel: "", depth: 0, title: C.seo.title, description: C.seo.description, bodyClass: "page-home",
   main: () => E.homeHTML(), scripts: [], call: "EENG.renderHome();",
   jsonld: Object.assign({}, course, {
-    description: plain(C.seo.description), inLanguage: "en", educationalLevel: "Undergraduate", isAccessibleForFree: true, author,
+    description: plain(C.seo.description), license, inLanguage: "en", educationalLevel: "Undergraduate", isAccessibleForFree: true, author,
     hasPart: C.chapters.filter((c) => c.status === "open").map((c) => ({ "@type": "LearningResource", name: "Chapter " + c.n + ": " + c.title, url: SITE + c.slug + "/" }))
   })
 }));
@@ -128,7 +130,7 @@ C.chapters.filter((ch) => ch.status === "open").forEach((ch) => {
     jsonld: {
       "@type": "LearningResource", name: "Chapter " + ch.n + ": " + ch.title, description: ch.seo.description, url: SITE + ch.slug + "/",
       learningResourceType: ["Lecture slides", "Lesson"], educationalLevel: "Undergraduate", inLanguage: "en", isAccessibleForFree: true,
-      teaches: skills, about: topics, author, isPartOf: course
+      teaches: skills, about: topics, author, license, isPartOf: course
     }
   }));
   urls.push(SITE + ch.slug + "/");
@@ -147,7 +149,7 @@ C.chapters.filter((ch) => ch.status === "open").forEach((ch) => {
       jsonld: {
         "@type": "Quiz", name: meta.sheetTitle, description: meta.sheetDescription, url: SITE + rel,
         learningResourceType: "Practice problems", educationalLevel: "Undergraduate", inLanguage: "en", isAccessibleForFree: true,
-        about: topics.length ? topics : [ch.title], author, isPartOf: course
+        about: topics.length ? topics : [ch.title], author, license, isPartOf: course
       }
     }));
     urls.push(SITE + rel);

@@ -18,3 +18,4 @@
 # Search-engine ownership verification files
 !/google*.html
 !/BingSiteAuth.xml
+!/LICENSE

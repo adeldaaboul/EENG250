@@ -266,3 +266,4 @@ a.ch-link .ch-title { color: var(--link); }
 .topic-list li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .topic-name { font-weight: 600; }
 .topic-practice { font-family: var(--font-ui); font-size: .82rem; white-space: nowrap; }
+.site-footer .license { margin-top: .6em; max-width: 60em; }

@@ -1,0 +1,29 @@
+EENG250 Electric Circuits I: course materials
+Copyright (c) 2026 Dr. Adel Daaboul
+
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0
+International License (CC BY-NC 4.0).
+
+You are free to:
+  Share: copy and redistribute the material in any medium or format.
+  Adapt: remix, transform and build upon the material.
+
+Under the following terms:
+  Attribution: give appropriate credit, provide a link to the licence, and
+  indicate if changes were made.
+  NonCommercial: you may not use the material for commercial purposes.
+
+Full licence text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+Summary: https://creativecommons.org/licenses/by-nc/4.0/
+
+Suggested credit:
+  Adel Daaboul, "EENG250 Electric Circuits I" course materials,
+  https://adeldaaboul.github.io/EENG250/, licensed under CC BY-NC 4.0.
+
+Exceptions:
+  Figures, tables and worked examples taken or adapted from Nilsson & Riedel,
+  "Electric Circuits", 11th edition (Pearson), remain the copyright of their
+  publisher and are not covered by this licence. They are marked in the slides
+  (for example "after Nilsson Fig. 1.4" or "Nilsson Example 1.3").
+  Third-party libraries loaded by the website (KaTeX, Google Fonts) keep their
+  own licences.

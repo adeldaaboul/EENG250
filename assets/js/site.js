@@ -89,7 +89,9 @@ window.EENG = window.EENG || {};
   E.footerHTML = function () {
     var c = E.course;
     return '<div class="wrap"><p>' + c.code + " &middot; " + c.title + " &middot; prepared by " + c.preparedBy + "</p>" +
-      "<p>Textbook: " + c.textbook + "</p></div>";
+      "<p>Textbook: " + c.textbook + "</p>" +
+      '<p class="license">&copy; 2026 ' + c.preparedBy + '. Course materials are licensed under <a rel="license noopener" href="' + c.license.url + '" target="_blank">' + c.license.name + "</a> " +
+      "(share and adapt with credit, not for commercial use). Figures and examples adapted from the textbook remain the publisher&rsquo;s copyright.</p></div>";
   };
 
   function statusBadge(ch) {
