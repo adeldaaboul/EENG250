@@ -183,6 +183,17 @@ write("404.html", `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Page not found | ${esc(C.code + " " + C.title)}</title>
+<script>
+  // Addresses are case-sensitive and every page name on this site is lower case,
+  // so /EENG250/Topics or /EENG250/Chapter-1-… is sent on to its lower-case spelling.
+  (function () {
+    var p = location.pathname, base = "/${SITE.split("/").slice(3).join("/")}";
+    if (p.indexOf(base) === 0) {
+      var rest = p.slice(base.length), lower = rest.toLowerCase();
+      if (lower !== rest) location.replace(base + lower + location.search + location.hash);
+    }
+  })();
+</script>
 <link rel="icon" href="${SITE}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${SITE}assets/css/base.css">
 <link rel="stylesheet" href="${SITE}assets/css/theme.css">

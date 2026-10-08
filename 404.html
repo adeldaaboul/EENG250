@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Page not found | EENG250 Electric Circuits I</title>
+<script>
+  // Addresses are case-sensitive and every page name on this site is lower case,
+  // so /EENG250/Topics or /EENG250/Chapter-1-… is sent on to its lower-case spelling.
+  (function () {
+    var p = location.pathname, base = "/EENG250/";
+    if (p.indexOf(base) === 0) {
+      var rest = p.slice(base.length), lower = rest.toLowerCase();
+      if (lower !== rest) location.replace(base + lower + location.search + location.hash);
+    }
+  })();
+</script>
 <link rel="icon" href="https://adeldaaboul.github.io/EENG250/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://adeldaaboul.github.io/EENG250/assets/css/base.css">
 <link rel="stylesheet" href="https://adeldaaboul.github.io/EENG250/assets/css/theme.css">
