@@ -177,11 +177,15 @@ window.EENG = window.EENG || {};
   E.homeHTML = function () {
     var c = E.course;
     return '<div class="wrap">' +
-      '<section class="hero">' +
+      '<section class="hero"><div class="hero-text">' +
       '<p class="eyebrow">Course website <span class="byline">prepared by ' + c.preparedBy + "</span></p>" +
       "<h1>" + c.code + ' <span class="hero-sep">&middot;</span> ' + c.title + "</h1>" +
       '<p class="lead">Lecture slides, introductions and practice sheets for every chapter.</p>' +
       '<ul class="facts"><li>' + c.credits + " credits</li><li>" + c.hours + " contact hours</li><li>" + c.weeks.length + " teaching weeks</li><li>Textbook: " + c.textbook + "</li></ul>" +
+      "</div>" +
+      // QR code of the site address, for projecting in class or printing; hidden on phones
+      '<figure class="hero-qr"><img src="' + E.root + 'assets/qr-eeng250.svg" width="150" height="150" alt="QR code that opens ' + c.siteUrl.replace(/^https:\/\//, "").replace(/\/$/, "") + '">' +
+      '<figcaption>Scan to open on a phone<br><a href="' + E.root + 'assets/qr-eeng250-card.png" download="EENG250 QR code.png">Download the QR card</a></figcaption></figure>' +
       "</section>" +
 
       '<section class="section" id="schedule"><h2>Schedule</h2>' +

@@ -267,3 +267,11 @@ a.ch-link .ch-title { color: var(--link); }
 .topic-name { font-weight: 600; }
 .topic-practice { font-family: var(--font-ui); font-size: .82rem; white-space: nowrap; }
 .site-footer .license { margin-top: .6em; max-width: 60em; }
+
+/* Home page QR code */
+.hero { display: flex; align-items: center; justify-content: space-between; gap: 24px 32px; }
+.hero-text { min-width: 0; }
+.hero-qr { flex: 0 0 auto; margin: 0; text-align: center; font-family: var(--font-ui); font-size: .8rem; line-height: 1.4; }
+.hero-qr img { display: block; width: 150px; height: 150px; margin: 0 auto 8px; padding: 6px; background: #fff; border-radius: 10px; }
+.hero-qr a { color: inherit; }
+@media (max-width: 720px) { .hero-qr { display: none; } }
