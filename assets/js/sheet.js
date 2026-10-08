@@ -194,6 +194,7 @@
     if (!document.getElementById("site-header").firstElementChild) document.getElementById("site-header").innerHTML = E.headerHTML();
     if (!document.getElementById("site-footer").firstElementChild) document.getElementById("site-footer").innerHTML = E.footerHTML();
     main.innerHTML = E.sheetHTML(chNum, p);
+    E.qrPanel();
 
     sheet.questions.forEach(function (q) {
       var el = document.getElementById(q.id);

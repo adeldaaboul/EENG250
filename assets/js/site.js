@@ -83,6 +83,7 @@ window.EENG = window.EENG || {};
       '<a href="' + E.url.topics() + '">Topics</a>' +
       '<a href="' + E.url.home("how") + '">How it works</a>' +
       '<a href="' + E.url.home("course") + '">Course info</a>' +
+      '<a href="#qr" class="nav-qr" data-qr-open>QR code</a>' +
       '</nav></div>';
   };
 
@@ -91,8 +92,66 @@ window.EENG = window.EENG || {};
     return '<div class="wrap"><p>' + c.code + " &middot; " + c.title + " &middot; prepared by " + c.preparedBy + "</p>" +
       "<p>Textbook: " + c.textbook + "</p>" +
       '<p class="license">&copy; 2026 ' + c.preparedBy + '. Course materials are licensed under <a rel="license noopener" href="' + c.license.url + '" target="_blank">' + c.license.name + "</a> " +
-      "(share and adapt with credit, not for commercial use). Figures and examples adapted from the textbook remain the publisher&rsquo;s copyright.</p></div>";
+      "(share and adapt with credit, not for commercial use). Figures and examples adapted from the textbook remain the publisher&rsquo;s copyright.</p></div>" +
+      E.qrPanelHTML();
   };
+
+  // Full-screen QR code for sharing the site from a phone. Opens from "QR code" in the menu
+  // (address #qr, so the phone's back button closes it too); works without scripts through :target.
+  E.qrPanelHTML = function () {
+    var c = E.course, short = c.siteUrl.replace(/^https:\/\//, "").replace(/\/$/, "");
+    return '<div id="qr" class="qr-panel" role="dialog" aria-modal="true" aria-labelledby="qr-title">' +
+      '<div class="qr-box">' +
+      '<p class="eyebrow">' + c.code + " &middot; " + c.title + "</p>" +
+      '<h2 id="qr-title">Scan to open the course site</h2>' +
+      '<img src="' + E.root + 'assets/qr-eeng250.svg" alt="QR code that opens ' + short + '">' +
+      '<p class="qr-url">' + short + "</p>" +
+      '<p class="qr-hint">Hold your screen up so a classmate can scan it with their phone camera.</p>' +
+      '<div class="qr-actions">' +
+      '<button type="button" class="btn" data-qr-share hidden>Share link</button>' +
+      '<button type="button" class="btn btn-quiet" data-qr-copy hidden>Copy link</button>' +
+      '<a href="#" class="btn btn-quiet" data-qr-close>Back</a>' +
+      "</div>" +
+      '<p class="qr-status" aria-live="polite"></p>' +
+      "</div></div>";
+  };
+
+  // Open, close and share the QR panel.
+  function qrPanel() {
+    var panel = document.getElementById("qr");
+    if (!panel || qrPanel.done) return;
+    qrPanel.done = true;
+    var openedHere = false;
+    var url = E.course.siteUrl;
+    var share = panel.querySelector("[data-qr-share]"), copy = panel.querySelector("[data-qr-copy]");
+    if (navigator.share) share.hidden = false;
+    else if (navigator.clipboard) copy.hidden = false;
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest("[data-qr-open], [data-qr-close], [data-qr-share], [data-qr-copy]");
+      if (!t) return;
+      if (t.hasAttribute("data-qr-open")) openedHere = true;   // the link itself adds #qr to the address
+      if (t.hasAttribute("data-qr-close")) {
+        e.preventDefault();
+        if (openedHere) { openedHere = false; history.back(); }
+        else history.replaceState(null, "", location.pathname + location.search), panel.classList.add("is-closed");
+      }
+      if (t.hasAttribute("data-qr-share")) {
+        navigator.share({ title: E.course.code + " " + E.course.title, url: url }).catch(function () { /* cancelled */ });
+      }
+      if (t.hasAttribute("data-qr-copy")) {
+        navigator.clipboard.writeText(url).then(function () {
+          panel.querySelector(".qr-status").textContent = "Link copied.";
+        });
+      }
+    });
+    window.addEventListener("hashchange", function () {
+      panel.classList.remove("is-closed");
+      if (location.hash !== "#qr") openedHere = false;
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && location.hash === "#qr") panel.querySelector("[data-qr-close]").click();
+    });
+  }
 
   function statusBadge(ch) {
     var open = ch.status === "open";
@@ -315,7 +374,9 @@ window.EENG = window.EENG || {};
   function chrome() {
     fill("site-header", E.headerHTML());
     fill("site-footer", E.footerHTML());
+    qrPanel();
   }
+  E.qrPanel = qrPanel;
 
   E.renderHome = function () {
     chrome();
